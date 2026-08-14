@@ -1,0 +1,348 @@
+﻿{
+  "name": "Portfolio Contact Automation",
+  "type": "SHARED",
+  "summary": "",
+  "description": "",
+  "tags": [],
+  "blogUrl": "",
+  "metadata": {
+    "externalId": "VkD4tKgOCWjGXjMB3WrO1"
+  },
+  "author": "yossef amr",
+  "categories": [],
+  "pieces": [
+    "@activepieces/piece-webhook",
+    "@activepieces/piece-open-router",
+    "@activepieces/piece-notion",
+    "@activepieces/piece-gmail"
+  ],
+  "flows": [
+    {
+      "displayName": "Portfolio Contact Automation",
+      "trigger": {
+        "name": "trigger",
+        "valid": true,
+        "displayName": "Catch Webhook",
+        "nextAction": {
+          "name": "step_4",
+          "skip": false,
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "auth": "{{connections['nLIQnkQMHEV8OvSnMrlcR']}}",
+              "model": "openai/gpt-4o",
+              "prompt": "Analyze the following contact form response from a client:\nName: {{trigger['output']['body']['name']}}\nEmail: {{trigger['output']['body']['email']}}\nMessage: {{trigger['output']['body']['message']}}\nDetermine the lead priority based on the message (e.g., budget, urgent timeline, big project scope, high value).\nRespond ONLY with one of these three exact values without any extra text:\n\"High Priority 🔴\" or \"Medium Priority 🟡\" or \"Low Priority 🟢\"",
+              "maxTokens": "800"
+            },
+            "pieceName": "@activepieces/piece-open-router",
+            "actionName": "ask-lmm",
+            "sampleData": {},
+            "pieceVersion": "0.1.8",
+            "propertySettings": {
+              "topP": {
+                "type": "MANUAL"
+              },
+              "model": {
+                "type": "MANUAL"
+              },
+              "prompt": {
+                "type": "MANUAL"
+              },
+              "maxTokens": {
+                "type": "MANUAL"
+              },
+              "temperature": {
+                "type": "MANUAL"
+              }
+            },
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_1",
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "auth": "{{connections['kOBFbGxt61mkXCAmoN0Wf']}}",
+                "database_id": "f0512664-a428-4b80-a529-0d62c83c4604",
+                "databaseFields": {
+                  "Name": "{{trigger['output']['body']['name']}}",
+                  "Email": "{{trigger['output']['body']['email']}}",
+                  "Notes": "{{step_4['output']}}",
+                  "Source": "Portfolio Website",
+                  "Status": "New",
+                  "Message": "{{trigger['output']['body']['message']}}",
+                  "Submitted At": "{{trigger['output']['body']['submitted_at']}}"
+                }
+              },
+              "pieceName": "@activepieces/piece-notion",
+              "actionName": "create_database_item",
+              "sampleData": {},
+              "pieceVersion": "0.6.9",
+              "propertySettings": {
+                "content": {
+                  "type": "MANUAL"
+                },
+                "database_id": {
+                  "type": "MANUAL"
+                },
+                "databaseFields": {
+                  "type": "MANUAL",
+                  "schema": {
+                    "Name": {
+                      "type": "SHORT_TEXT",
+                      "required": false,
+                      "displayName": "Name"
+                    },
+                    "Email": {
+                      "type": "SHORT_TEXT",
+                      "required": false,
+                      "displayName": "Email"
+                    },
+                    "Notes": {
+                      "type": "LONG_TEXT",
+                      "required": false,
+                      "displayName": "Notes"
+                    },
+                    "Source": {
+                      "type": "STATIC_DROPDOWN",
+                      "options": {
+                        "options": [],
+                        "disabled": false
+                      },
+                      "required": false,
+                      "displayName": "Source"
+                    },
+                    "Status": {
+                      "type": "STATIC_DROPDOWN",
+                      "options": {
+                        "options": [],
+                        "disabled": false
+                      },
+                      "required": false,
+                      "displayName": "Status"
+                    },
+                    "Message": {
+                      "type": "LONG_TEXT",
+                      "required": false,
+                      "displayName": "Message"
+                    },
+                    "Submitted At": {
+                      "type": "DATE_TIME",
+                      "required": false,
+                      "displayName": "Submitted At"
+                    }
+                  }
+                }
+              },
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": true
+                }
+              }
+            },
+            "displayName": "Create Database Item",
+            "lastUpdatedDate": "2026-08-12T04:51:17.981Z",
+            "continueOnFailureBranches": {
+              "onFailure": {
+                "name": "step_3",
+                "skip": false,
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "cc": [],
+                    "bcc": [],
+                    "auth": "{{connections['MwPp8y4pKZ7xnILUrrmz9']}}",
+                    "body": "{{trigger['output']['body']}}",
+                    "draft": false,
+                    "subject": "⚠️ Warning: Failed to save lead to Notion",
+                    "receiver": [
+                      "ya2190069@gmail.com"
+                    ],
+                    "reply_to": [],
+                    "body_type": "plain_text",
+                    "attachments": []
+                  },
+                  "pieceName": "@activepieces/piece-gmail",
+                  "actionName": "send_email",
+                  "sampleData": {},
+                  "pieceVersion": "0.12.10",
+                  "propertySettings": {
+                    "cc": {
+                      "type": "MANUAL"
+                    },
+                    "bcc": {
+                      "type": "MANUAL"
+                    },
+                    "body": {
+                      "type": "MANUAL"
+                    },
+                    "from": {
+                      "type": "MANUAL"
+                    },
+                    "draft": {
+                      "type": "MANUAL"
+                    },
+                    "subject": {
+                      "type": "MANUAL"
+                    },
+                    "receiver": {
+                      "type": "MANUAL"
+                    },
+                    "reply_to": {
+                      "type": "MANUAL"
+                    },
+                    "body_type": {
+                      "type": "MANUAL"
+                    },
+                    "attachments": {
+                      "type": "MANUAL"
+                    },
+                    "in_reply_to": {
+                      "type": "MANUAL"
+                    },
+                    "sender_name": {
+                      "type": "MANUAL"
+                    }
+                  },
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "displayName": "Send Email",
+                "lastUpdatedDate": "2026-08-12T04:47:53.657Z"
+              },
+              "onSuccess": {
+                "name": "step_2",
+                "skip": false,
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "cc": [],
+                    "bcc": [],
+                    "auth": "{{connections['MwPp8y4pKZ7xnILUrrmz9']}}",
+                    "body": "Hi {{trigger['output']['body']['name']}},\nThank you for contacting us ❤\n\nWe have received your message successfully and will get back to you as soon as possible.\n\nThanks for reaching out! \nIf you'd like to jump on a quick call to discuss your project details, feel free to pick a suitable time here:\nhttps://calendly.com/ya2190069/30min\n\nBest regards ❤\nYoussef Amr",
+                    "draft": false,
+                    "subject": "We received your message — Youssef Amr Team",
+                    "receiver": [
+                      "{{trigger['output']['body']['email']}}"
+                    ],
+                    "reply_to": [],
+                    "body_type": "plain_text",
+                    "attachments": []
+                  },
+                  "pieceName": "@activepieces/piece-gmail",
+                  "actionName": "send_email",
+                  "sampleData": {},
+                  "pieceVersion": "0.12.10",
+                  "propertySettings": {
+                    "cc": {
+                      "type": "MANUAL"
+                    },
+                    "bcc": {
+                      "type": "MANUAL"
+                    },
+                    "body": {
+                      "type": "MANUAL"
+                    },
+                    "from": {
+                      "type": "MANUAL"
+                    },
+                    "draft": {
+                      "type": "MANUAL"
+                    },
+                    "subject": {
+                      "type": "MANUAL"
+                    },
+                    "receiver": {
+                      "type": "MANUAL"
+                    },
+                    "reply_to": {
+                      "type": "MANUAL"
+                    },
+                    "body_type": {
+                      "type": "MANUAL"
+                    },
+                    "attachments": {
+                      "type": "MANUAL"
+                    },
+                    "in_reply_to": {
+                      "type": "MANUAL"
+                    },
+                    "sender_name": {
+                      "type": "MANUAL"
+                    }
+                  },
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "displayName": "Send Email",
+                "lastUpdatedDate": "2026-08-12T04:58:03.393Z"
+              }
+            }
+          },
+          "displayName": "Ask LLM",
+          "lastUpdatedDate": "2026-08-12T04:50:05.739Z"
+        },
+        "lastUpdatedDate": "2026-08-12T04:47:53.656Z",
+        "type": "PIECE_TRIGGER",
+        "settings": {
+          "sampleData": {},
+          "propertySettings": {
+            "authType": {
+              "type": "MANUAL"
+            },
+            "authFields": {
+              "type": "MANUAL",
+              "schema": {}
+            },
+            "liveMarkdown": {
+              "type": "MANUAL"
+            },
+            "syncMarkdown": {
+              "type": "MANUAL"
+            },
+            "testMarkdown": {
+              "type": "MANUAL"
+            }
+          },
+          "pieceName": "@activepieces/piece-webhook",
+          "pieceVersion": "0.1.40",
+          "triggerName": "catch_webhook",
+          "input": {
+            "authType": "none",
+            "authFields": {}
+          }
+        }
+      },
+      "valid": true,
+      "schemaVersion": "23",
+      "notes": []
+    }
+  ],
+  "status": "PUBLISHED"
+}
